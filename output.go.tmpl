@@ -4,8 +4,8 @@
 package mapper
 
 import (
-	{{- range $import, $_ := .Imports }}
-	"{{ $import }}"
+	{{- range $import, $alias := .Imports }}
+	{{ $alias }} "{{ $import }}"
 	{{- end }}
 )
 {{ range $funcName, $func := .MappingFuncs }}

@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
+	"strings"
 	"text/template"
 )
 
@@ -20,16 +21,26 @@ func Output(writer io.Writer, config *Config) {
 	}
 	type TemplateData struct {
 		Editable bool
-		Imports  map[string]struct{}
+		Imports  map[string]string
 
 		MappingFuncs map[string]Func // func name -> func data
 	}
 
-	imports := make(map[string]struct{}, len(config.mappings))
+	imports := make(map[string]string, len(config.mappings))
 	for source, dests := range config.mappings {
-		imports[source.Package] = struct{}{}
+
+		sourcePackages := strings.Split(source.Package, "/")
+		sourceAlias := sourcePackages[len(sourcePackages)-1]
+		sourceAlias = strings.ReplaceAll(sourceAlias, "-", "_")
+		sourceAlias = strings.ReplaceAll(sourceAlias, ".", "_")
+		imports[source.Package] = sourceAlias
+
 		for dest := range dests {
-			imports[dest.Package] = struct{}{}
+			destPackages := strings.Split(dest.Package, "/")
+			destAlias := sourcePackages[len(destPackages)-1]
+			destAlias = strings.ReplaceAll(destAlias, "-", "_")
+			destAlias = strings.ReplaceAll(destAlias, ".", "_")
+			imports[dest.Package] = destPackages[len(destPackages)-1]
 		}
 	}
 
