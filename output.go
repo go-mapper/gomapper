@@ -45,7 +45,7 @@ func Output(writer io.Writer, config *Config) {
 				builder.Append(fmt.Sprintf("\t%s: sour.%s", m.Destination, m.Source))
 			}
 
-			builder.Append(fmt.Sprintf("}"))
+			builder.Append("}")
 
 			// todo: handle func conflicts
 			funcName := fmt.Sprintf("Map%sTo%s", source.Name, dest.Name)
