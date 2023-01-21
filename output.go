@@ -37,10 +37,10 @@ func Output(writer io.Writer, config *Config) {
 
 		for dest := range dests {
 			destPackages := strings.Split(dest.Package, "/")
-			destAlias := sourcePackages[len(destPackages)-1]
+			destAlias := destPackages[len(destPackages)-1]
 			destAlias = strings.ReplaceAll(destAlias, "-", "_")
 			destAlias = strings.ReplaceAll(destAlias, ".", "_")
-			imports[dest.Package] = destPackages[len(destPackages)-1]
+			imports[dest.Package] = destAlias
 		}
 	}
 
