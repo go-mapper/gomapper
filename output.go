@@ -38,16 +38,14 @@ func Output(writer io.Writer, config *Config) {
 		for dest, mappings := range dests {
 			builder := funcBuilder{}
 
-			// TODO: replace with sour{FIELD: dest.FIELD}
-			builder.Append(fmt.Sprintf("var dest %s", dest.Name))
-			builder.NewLine()
+			// TODO: format code
+			builder.Append(fmt.Sprintf("return %s{", dest.Name))
 
 			for _, m := range mappings {
-				builder.Append(fmt.Sprintf("dest.%s = sour.%s", m.Destination, m.Source))
+				builder.Append(fmt.Sprintf("\t%s: sour.%s", m.Destination, m.Source))
 			}
 
-			builder.NewLine()
-			builder.Append(fmt.Sprintf("return dest"))
+			builder.Append(fmt.Sprintf("}"))
 
 			// todo: handle func conflicts
 			funcName := fmt.Sprintf("Map%sTo%s", source.Name, dest.Name)
