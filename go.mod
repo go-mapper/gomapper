@@ -1,4 +1,4 @@
-module github.com/vadimalekseev/gomapper
+module github.com/go-mapper/gomapper
 
 go 1.18
 
