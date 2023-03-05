@@ -12,7 +12,7 @@ type Mapping struct {
 }
 
 type Config struct {
-	Mappings []Mapping `json:"mappings"` // source_type -> destination_type -> []Mapping
+	Mappings []Mapping `json:"mappings"`
 }
 
 func NewConfig() *Config {
