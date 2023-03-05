@@ -1,10 +1,8 @@
-package mapper
+package gomapper
 
 import (
 	"fmt"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 type Email string
@@ -26,8 +24,7 @@ type UserDAL struct {
 func TestMap(t *testing.T) {
 	cfg := NewConfig()
 
-	err := Map[UserDTO, UserDAL](cfg)
-	require.NoError(t, err)
+	Map[UserDTO, UserDAL](cfg)
 
 	fmt.Printf("%+v\n", cfg)
 }

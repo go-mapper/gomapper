@@ -1,4 +1,4 @@
-package mapper
+package gomapper
 
 type ApplyOptions func(options *configOptions)
 
