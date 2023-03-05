@@ -1,24 +1,23 @@
-package mapper
+package gomapper
 
-type TypeInfo struct {
-	Package string
-	Name    string
+type MappingInfo struct {
+	Package string `json:"package"`
+	Name    string `json:"name"`
+	Field   string `json:"field"`
 }
 
-type FieldName string
-
 type Mapping struct {
-	Source      FieldName
-	Destination FieldName
+	Source      MappingInfo `json:"source"`
+	Destination MappingInfo `json:"destination"`
 }
 
 type Config struct {
-	mappings map[TypeInfo]map[TypeInfo][]Mapping // source_type -> destination_type -> []Mapping
+	Mappings []Mapping `json:"mappings"`
 }
 
 func NewConfig() *Config {
 	return &Config{
-		mappings: make(map[TypeInfo]map[TypeInfo][]Mapping),
+		Mappings: make([]Mapping, 0),
 	}
 }
 

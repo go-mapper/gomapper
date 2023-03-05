@@ -29,7 +29,6 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-    - deadcode
     - depguard
     - dogsled
     - dupl
@@ -42,14 +41,12 @@ linters:
     - misspell
     - nakedret
     - prealloc
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
     - usestdlibvars
-    - varcheck
     - whitespace
     # Do not enable:
     # - staticcheck (does not work with golangci-lint 1.46.2 and go 1.18.2)
@@ -73,3 +70,6 @@ issues:
     # Ignore shadowing of err.
     - linters: [ govet ]
       text: 'declaration of "(err|ctx)"'
+
+    - linters: [ stylecheck ]
+      text: 'ST1000'

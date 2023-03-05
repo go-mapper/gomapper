@@ -1,11 +1,13 @@
-package mapper
+package gomapper
 
 import (
 	"reflect"
 	"strings"
+
+	"github.com/go-mapper/gomapper/internal/logger"
 )
 
-func Map[From any, To any](cfg *Config, appliers ...ApplyOptions) error {
+func Map[From any, To any](cfg *Config, appliers ...ApplyOptions) {
 	options := defaultOptions()
 	for _, apply := range appliers {
 		apply(&options)
@@ -31,24 +33,18 @@ func Map[From any, To any](cfg *Config, appliers ...ApplyOptions) error {
 		}
 
 		mappings = append(mappings, Mapping{
-			Source:      FieldName(srcField.Name),
-			Destination: FieldName(dstField.Name),
+			Source: MappingInfo{
+				Package: fromType.PkgPath(),
+				Name:    fromType.Name(),
+				Field:   srcField.Name,
+			},
+			Destination: MappingInfo{
+				Package: toType.PkgPath(),
+				Name:    toType.Name(),
+				Field:   dstField.Name,
+			},
 		})
 	}
 
-	sourceTypeName := TypeInfo{
-		Package: fromType.PkgPath(),
-		Name:    fromType.Name(),
-	}
-	destTypeName := TypeInfo{
-		Package: toType.PkgPath(),
-		Name:    toType.Name(),
-	}
-
-	if cfg.mappings[sourceTypeName] == nil {
-		cfg.mappings[sourceTypeName] = make(map[TypeInfo][]Mapping)
-	}
-	cfg.mappings[sourceTypeName][destTypeName] = mappings
-
-	return nil
+	cfg.Mappings = append(cfg.Mappings, mappings...)
 }

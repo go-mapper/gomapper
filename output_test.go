@@ -1,11 +1,9 @@
-package mapper
+package gomapper
 
 import (
 	"bytes"
 	"fmt"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestOutput(t *testing.T) {
@@ -13,8 +11,7 @@ func TestOutput(t *testing.T) {
 
 	cfg := NewConfig()
 
-	err := Map[UserDTO, UserDAL](cfg)
-	require.NoError(t, err)
+	Map[UserDTO, UserDAL](cfg)
 
 	Output(buf, cfg)
 

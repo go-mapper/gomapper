@@ -1,4 +1,4 @@
-package mapper
+package gomapper
 
 import (
 	_ "embed"
@@ -26,43 +26,47 @@ func Output(writer io.Writer, config *Config) {
 		MappingFuncs map[string]Func // func name -> func data
 	}
 
-	imports := make(map[string]string, len(config.mappings))
-	for source, dests := range config.mappings {
-
-		sourcePackages := strings.Split(source.Package, "/")
-		sourceAlias := sourcePackages[len(sourcePackages)-1]
-		sourceAlias = strings.ReplaceAll(sourceAlias, "-", "_")
-		sourceAlias = strings.ReplaceAll(sourceAlias, ".", "_")
-		imports[source.Package] = sourceAlias
-
-		for dest := range dests {
-			destPackages := strings.Split(dest.Package, "/")
-			destAlias := destPackages[len(destPackages)-1]
-			destAlias = strings.ReplaceAll(destAlias, "-", "_")
-			destAlias = strings.ReplaceAll(destAlias, ".", "_")
-			imports[dest.Package] = destAlias
+	type FromTo struct {
+		From, To string
+	}
+	imports := make(map[string]string, len(config.Mappings))
+	// destination type -> source type -> source+destination fields
+	mappingByTypeName := make(map[string]map[string][]FromTo)
+	for _, mapping := range config.Mappings {
+		if _, ok := imports[mapping.Source.Package]; !ok {
+			imports[mapping.Source.Package] = formatImport(mapping.Source.Package)
+			imports[mapping.Destination.Package] = formatImport(mapping.Destination.Package)
 		}
+
+		if mappingByTypeName[mapping.Destination.Name] == nil {
+			mappingByTypeName[mapping.Destination.Name] = make(map[string][]FromTo)
+		}
+
+		fieldMappings := mappingByTypeName[mapping.Destination.Name]
+		fieldMappings[mapping.Source.Name] = append(fieldMappings[mapping.Source.Name], FromTo{
+			From: mapping.Source.Field,
+			To:   mapping.Destination.Field,
+		})
 	}
 
-	funcToBody := make(map[string]Func, len(config.mappings))
-	for source, dests := range config.mappings {
-		for dest, mappings := range dests {
+	funcBodyByFuncName := make(map[string]Func, len(config.Mappings))
+	for source, dests := range mappingByTypeName {
+		for dest, mappingFields := range dests {
 			builder := funcBuilder{}
 
-			// TODO: format code
-			builder.Append(fmt.Sprintf("return %s{", dest.Name))
+			builder.Append(fmt.Sprintf("return %s{", dest))
 
-			for _, m := range mappings {
-				builder.Append(fmt.Sprintf("\t%s: sour.%s", m.Destination, m.Source))
+			for _, fromTo := range mappingFields {
+				builder.Append(fmt.Sprintf("\t%s: sour.%s,", fromTo.From, fromTo.To))
 			}
 
 			builder.Append("}")
 
 			// todo: handle func conflicts
-			funcName := fmt.Sprintf("Map%sTo%s", source.Name, dest.Name)
-			funcToBody[funcName] = Func{
-				Arg:    fmt.Sprintf("sour %s", source.Name),
-				Return: dest.Name,
+			funcName := fmt.Sprintf("Map%sTo%s", source, dest)
+			funcBodyByFuncName[funcName] = Func{
+				Arg:    fmt.Sprintf("sour %s", source),
+				Return: dest,
 				Body:   builder.Lines(),
 			}
 		}
@@ -71,7 +75,7 @@ func Output(writer io.Writer, config *Config) {
 	data := TemplateData{
 		Editable:     false,
 		Imports:      imports,
-		MappingFuncs: funcToBody,
+		MappingFuncs: funcBodyByFuncName,
 	}
 
 	if err := tmpl.Execute(writer, data); err != nil {
@@ -93,4 +97,12 @@ func (b *funcBuilder) NewLine() {
 
 func (b *funcBuilder) Lines() []string {
 	return b.lines
+}
+
+func formatImport(in string) string {
+	sourcePackages := strings.Split(in, "/")
+	out := sourcePackages[len(sourcePackages)-1]
+	out = strings.ReplaceAll(out, "-", "_")
+	out = strings.ReplaceAll(out, ".", "_")
+	return out
 }
